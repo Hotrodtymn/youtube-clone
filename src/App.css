@@ -1,38 +1,278 @@
-.App {
-  text-align: center;
+/* =========================
+   GLOBAL
+========================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #0f0f0f;
+  background: #fff;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+button {
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* =========================
+   NAV
+========================= */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 64px;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  background: #fff;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Left Side */
+
+.nav__left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.nav__menu {
+  font-size: 22px;
+  padding: 8px;
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #0f0f0f;
+  font-size: 21px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.nav__logo--icon {
+  display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  width: 32px;
+  height: 22px;
+  border-radius: 6px;
+  background: #ff0000;
+  color: #fff;
+  font-size: 13px;
 }
 
-.App-link {
-  color: #61dafb;
+/* Search */
+
+.nav__search {
+  display: flex;
+  width: 40%;
+  max-width: 600px;
+  height: 40px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
+.nav__search input {
+  flex: 1;
+  padding: 0 16px;
+  border: 1px solid #ccc;
+  border-right: none;
+  border-radius: 20px 0 0 20px;
+  outline: none;
+  font-size: 16px;
+}
+
+.nav__search input:focus {
+  border-color: #1c62b9;
+}
+
+.nav__search--button {
+  width: 64px;
+  border: 1px solid #ccc;
+  border-radius: 0 20px 20px 0;
+  background: #f8f8f8;
+  font-size: 18px;
+}
+
+/* Right Side */
+
+.nav__right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nav__icon {
+  font-size: 20px;
+}
+
+.nav__profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #7342d6;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 0 12px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .nav__logo span:last-child {
+    display: none;
+  }
+
+  .nav__search {
+    width: 50%;
+  }
+
+  .nav__right {
+    gap: 10px;
+  }
+}
+
+@media (max-width: 500px) {
+  .nav__search {
+    width: auto;
+    flex: 1;
+    margin: 0 10px;
+  }
+
+  .nav__right .nav__icon:first-child {
+    display: none;
+  }
+}
+
+/* =========================
+   APP BODY
+========================= */
+
+.app__body {
+  display: flex;
+  min-height: calc(100vh - 64px);
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar {
+  position: sticky;
+  top: 64px;
+  width: 240px;
+  height: calc(100vh - 64px);
+  padding: 12px;
+  overflow-y: auto;
+  background: #fff;
+}
+
+.sidebar__section {
+  padding: 8px 0;
+}
+
+.sidebar__heading {
+  padding: 10px 12px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.sidebar__link {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 10px;
+  color: #0f0f0f;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+
+.sidebar__link:hover {
+  background: #f2f2f2;
+}
+
+.sidebar__link.active {
+  background: #f2f2f2;
+  font-weight: 600;
+}
+
+.sidebar__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  font-size: 20px;
+}
+
+.sidebar__divider {
+  height: 1px;
+  margin: 8px 0;
+  background: #e5e5e5;
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+.main {
+  flex: 1;
+  min-width: 0;
+  padding: 24px;
+}
+
+/* =========================
+   SIDEBAR RESPONSIVE
+========================= */
+
+@media (max-width: 1000px) {
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebar__link {
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 4px;
+    font-size: 10px;
+  }
+
+  .sidebar__heading {
+    display: none;
+  }
+
+  .sidebar__icon {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    padding: 16px;
   }
 }
