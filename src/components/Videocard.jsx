@@ -6,6 +6,7 @@ const VideoCard = ({ video }) => {
 
   return (
     <div className="video-card">
+
       <Link
         to={`/video/${videoId}`}
         className="video-card__thumbnail"
@@ -18,6 +19,7 @@ const VideoCard = ({ video }) => {
 
       <div className="video-card__info">
         <div className="video-card__details">
+
           <Link
             to={`/video/${videoId}`}
             className="video-card__title"
@@ -28,8 +30,10 @@ const VideoCard = ({ video }) => {
           <p className="video-card__channel">
             {video.snippet.channelTitle}
           </p>
+
         </div>
       </div>
+
     </div>
   );
 };

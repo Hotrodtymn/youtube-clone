@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import VideoCard from "../components/Videocard";
 import {
   getVideo,
+  getChannel,
   searchVideos,
 } from "../services/youtubeApi";
 
@@ -10,6 +11,7 @@ const Video = () => {
   const { id } = useParams();
 
   const [video, setVideo] = useState(null);
+  const [channel, setChannel] = useState(null);
   const [recommendedVideos, setRecommendedVideos] =
     useState([]);
 
@@ -53,21 +55,51 @@ const Video = () => {
 
         setVideo(videoData);
 
-        const recommended =
-          await searchVideos(
-            videoData.snippet.title
+        // Load channel information
+        if (videoData.snippet?.channelId) {
+          try {
+            const channelData = await getChannel(
+              videoData.snippet.channelId
+            );
+
+            setChannel(channelData || null);
+          } catch (channelError) {
+            console.error(
+              "Channel error:",
+              channelError
+            );
+
+            setChannel(null);
+          }
+        }
+
+        // Load recommended videos
+        try {
+          const recommended =
+            await searchVideos(
+              videoData.snippet.title
+            );
+
+          const filtered = recommended.filter(
+            (item) =>
+              item.id?.videoId !== id
           );
 
-        const filtered = recommended.filter(
-          (item) =>
-            item.id.videoId !== id
-        );
+          setRecommendedVideos(filtered);
+        } catch (recommendationError) {
+          console.error(
+            "Recommendation error:",
+            recommendationError
+          );
 
-        setRecommendedVideos(filtered);
+          setRecommendedVideos([]);
+        }
       } catch (error) {
-        console.error(error);
+        console.error("Video error:", error);
+
         setError(
-          "Unable to load this YouTube video."
+          error.message ||
+            "Unable to load this YouTube video."
         );
       } finally {
         setLoading(false);
@@ -131,20 +163,43 @@ const Video = () => {
     );
   }
 
-  const title = video.snippet.title;
-  const channel =
-    video.snippet.channelTitle;
+  const title = video.snippet?.title || "Untitled";
+
+  const channelTitle =
+    video.snippet?.channelTitle ||
+    "Unknown channel";
 
   const description =
-    video.snippet.description;
+    video.snippet?.description ||
+    "No description available.";
 
   const viewCount =
     Number(
       video.statistics?.viewCount || 0
     ).toLocaleString();
 
+  const publishedDate =
+    video.snippet?.publishedAt
+      ? new Date(
+          video.snippet.publishedAt
+        ).toLocaleDateString()
+      : "";
+
+  const channelName =
+    channel?.snippet?.title ||
+    channelTitle;
+
+  const subscriberCount =
+    channel?.statistics?.subscriberCount;
+
+  const channelImage =
+    channel?.snippet?.thumbnails?.default?.url ||
+    channel?.snippet?.thumbnails?.medium?.url ||
+    channel?.snippet?.thumbnails?.high?.url;
+
   return (
     <div className="video-layout">
+
       <main className="video-page">
 
         {/* YouTube Player */}
@@ -170,9 +225,7 @@ const Video = () => {
             <span>•</span>
 
             <span>
-              {new Date(
-                video.snippet.publishedAt
-              ).toLocaleDateString()}
+              {publishedDate}
             </span>
           </div>
 
@@ -214,17 +267,28 @@ const Video = () => {
           {/* Channel */}
           <div className="video-page__channel">
 
-            <div className="comment__avatar">
-              {channel
-                .charAt(0)
-                .toUpperCase()}
-            </div>
+            {channelImage ? (
+              <img
+                src={channelImage}
+                alt={channelName}
+              />
+            ) : (
+              <div className="comment__avatar">
+                {channelName
+                  .charAt(0)
+                  .toUpperCase()}
+              </div>
+            )}
 
             <div>
-              <h3>{channel}</h3>
+              <h3>{channelName}</h3>
 
               <p>
-                YouTube Channel
+                {subscriberCount
+                  ? `${Number(
+                      subscriberCount
+                    ).toLocaleString()} subscribers`
+                  : "YouTube Channel"}
               </p>
             </div>
 
@@ -336,7 +400,7 @@ const Video = () => {
             (recommendedVideo) => (
               <VideoCard
                 key={
-                  recommendedVideo.id.videoId
+                  recommendedVideo.id?.videoId
                 }
                 video={recommendedVideo}
               />

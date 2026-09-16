@@ -1,12 +1,8 @@
-const API_KEY = import.meta.env.VITE_YOUTUBE_API_KEY;
+const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
 
-console.log(
-  "YouTube API key loaded:",
-  API_KEY ? "YES" : "NO"
-);
+console.log("YouTube API key loaded:", API_KEY ? "YES" : "NO");
 
-const BASE_URL =
-  "https://www.googleapis.com/youtube/v3";
+const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
 export const searchVideos = async (query) => {
   const url = new URL(`${BASE_URL}/search`);
@@ -24,10 +20,7 @@ export const searchVideos = async (query) => {
   if (!response.ok) {
     console.error("YouTube API error:", data);
 
-    throw new Error(
-      data.error?.message ||
-        "Failed to fetch YouTube videos"
-    );
+    throw new Error(data.error?.message || "Failed to fetch YouTube videos");
   }
 
   return data.items;
@@ -36,10 +29,7 @@ export const searchVideos = async (query) => {
 export const getVideo = async (videoId) => {
   const url = new URL(`${BASE_URL}/videos`);
 
-  url.searchParams.set(
-    "part",
-    "snippet,statistics"
-  );
+  url.searchParams.set("part", "snippet,statistics");
 
   url.searchParams.set("id", videoId);
   url.searchParams.set("key", API_KEY);
@@ -50,9 +40,28 @@ export const getVideo = async (videoId) => {
   if (!response.ok) {
     console.error("YouTube API error:", data);
 
+    throw new Error(data.error?.message || "Failed to fetch YouTube video");
+  }
+
+  return data.items[0];
+};
+
+export const getChannel = async (channelId) => {
+  const url = new URL(`${BASE_URL}/channels`);
+
+  url.searchParams.set("part", "snippet,statistics");
+  url.searchParams.set("id", channelId);
+  url.searchParams.set("key", API_KEY);
+
+  const response = await fetch(url);
+  const data = await response.json();
+
+  if (!response.ok) {
+    console.error("YouTube API error:", data);
+
     throw new Error(
       data.error?.message ||
-        "Failed to fetch YouTube video"
+        "Failed to fetch YouTube channel"
     );
   }
 
