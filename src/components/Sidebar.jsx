@@ -1,9 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Sidebar = () => {
+const Sidebar = ({ sidebarOpen }) => {
   return (
-    <aside className="sidebar">
+    <aside className={sidebarOpen ? "sidebar" : "sidebar sidebar--closed"}>
+      {" "}
       <div className="sidebar__section">
         <Link to="/" className="sidebar__link active">
           <span className="sidebar__icon">⌂</span>
@@ -20,9 +21,7 @@ const Sidebar = () => {
           <span>Subscriptions</span>
         </Link>
       </div>
-
       <div className="sidebar__divider"></div>
-
       <div className="sidebar__section">
         <h3 className="sidebar__heading">You</h3>
 
@@ -56,9 +55,7 @@ const Sidebar = () => {
           <span>Liked videos</span>
         </Link>
       </div>
-
       <div className="sidebar__divider"></div>
-
       <div className="sidebar__section">
         <h3 className="sidebar__heading">Explore</h3>
 
