@@ -8,6 +8,7 @@ import Sidebar from "./components/Sidebar";
 import Home from "./pages/Home";
 import Search from "./pages/Search";
 import Video from "./pages/Video";
+import Library from "./pages/Library";
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -26,12 +27,27 @@ function App() {
 
           <main className={sidebarOpen ? "main" : "main main--expanded"}>
             <Switch>
-              <Route path="/video/:id" component={Video} />
+  <Route
+    path="/video/:id"
+    component={Video}
+  />
 
-              <Route path="/search" component={Search} />
+  <Route
+    path="/search"
+    component={Search}
+  />
 
-              <Route path="/" exact component={Home} />
-            </Switch>
+  <Route
+    path="/library"
+    component={Library}
+  />
+
+  <Route
+    path="/"
+    exact
+    component={Home}
+  />
+</Switch>
           </main>
         </div>
       </div>

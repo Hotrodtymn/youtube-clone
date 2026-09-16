@@ -1,89 +1,113 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const Sidebar = ({ sidebarOpen }) => {
+  const location = useLocation();
+
+  const isHome =
+    location.pathname === "/" && !location.search;
+
+  const navItems = [
+    {
+      label: "Discover",
+      icon: "⌂",
+      to: "/",
+      active: isHome,
+    },
+    {
+      label: "Trending",
+      icon: "🔥",
+      to: "/search?query=trending",
+    },
+    {
+      label: "Following",
+      icon: "♡",
+      to: "/",
+    },
+  ];
+
+  const libraryItems = [
+    {
+  label: "Watch Later",
+  icon: "◷",
+  to: "/library?tab=watch-later",
+},
+   {
+  label: "Favorites",
+  icon: "★",
+  to: "/library?tab=favorites",
+},
+    {
+      label: "Music",
+      icon: "♫",
+      to: "/search?query=music",
+    },
+  ];
+
+  const exploreItems = [
+    {
+      label: "Gaming",
+      icon: "🎮",
+      to: "/search?query=gaming",
+    },
+    {
+      label: "Technology",
+      icon: "💻",
+      to: "/search?query=technology",
+    },
+    {
+      label: "Design",
+      icon: "🎨",
+      to: "/search?query=design",
+    },
+  ];
+
+  const renderLinks = (items) =>
+    items.map((item) => (
+      <Link
+        key={item.label}
+        to={item.to}
+        className={
+          item.active
+            ? "sidebar__link active"
+            : "sidebar__link"
+        }
+      >
+        <span className="sidebar__icon">
+          {item.icon}
+        </span>
+
+        <span>{item.label}</span>
+      </Link>
+    ));
+
   return (
-    <aside className={sidebarOpen ? "sidebar" : "sidebar sidebar--closed"}>
-      {" "}
-      <div className="sidebar__section">
-        <Link to="/" className="sidebar__link active">
-          <span className="sidebar__icon">⌂</span>
-          <span>Home</span>
-        </Link>
+    <aside
+      className={
+        sidebarOpen
+          ? "sidebar"
+          : "sidebar sidebar--closed"
+      }
+    >
+      <nav>
+        {renderLinks(navItems)}
 
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">▶</span>
-          <span>Shorts</span>
-        </Link>
+        <div className="sidebar__section">
+          <div className="sidebar__section-title">
+            Library
+          </div>
 
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">▣</span>
-          <span>Subscriptions</span>
-        </Link>
-      </div>
-      <div className="sidebar__divider"></div>
-      <div className="sidebar__section">
-        <h3 className="sidebar__heading">You</h3>
+          {renderLinks(libraryItems)}
+        </div>
 
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">▸</span>
-          <span>Your channel</span>
-        </Link>
+        <div className="sidebar__section">
+          <div className="sidebar__section-title">
+            Explore
+          </div>
 
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">◴</span>
-          <span>History</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">▱</span>
-          <span>Playlists</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">▶</span>
-          <span>Your videos</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">⌛</span>
-          <span>Watch later</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">♡</span>
-          <span>Liked videos</span>
-        </Link>
-      </div>
-      <div className="sidebar__divider"></div>
-      <div className="sidebar__section">
-        <h3 className="sidebar__heading">Explore</h3>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">🔥</span>
-          <span>Trending</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">♫</span>
-          <span>Music</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">🎬</span>
-          <span>Movies & TV</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">◉</span>
-          <span>Live</span>
-        </Link>
-
-        <Link to="/" className="sidebar__link">
-          <span className="sidebar__icon">⚽</span>
-          <span>Sports</span>
-        </Link>
-      </div>
+          {renderLinks(exploreItems)}
+        </div>
+      </nav>
     </aside>
   );
 };

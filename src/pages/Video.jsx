@@ -1,45 +1,35 @@
 import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import VideoCard from "../components/Videocard";
+
 import {
   getVideo,
   getChannel,
   searchVideos,
+  getComments,
 } from "../services/youtubeApi";
+
+import VideoCard from "../components/Videocard";
+
+import {
+  getWatchLater,
+  addToWatchLater,
+  removeFromWatchLater,
+  isInWatchLater,
+} from "../services/storage";
 
 const Video = () => {
   const { id } = useParams();
 
   const [video, setVideo] = useState(null);
   const [channel, setChannel] = useState(null);
-  const [recommendedVideos, setRecommendedVideos] =
-    useState([]);
-
+  const [recommended, setRecommended] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [comments, setComments] = useState([]);
 
   const [liked, setLiked] = useState(false);
-  const [disliked, setDisliked] = useState(false);
-  const [subscribed, setSubscribed] =
-    useState(false);
-
-  const [commentText, setCommentText] =
-    useState("");
-
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      name: "John Developer",
-      avatar: "J",
-      text: "Great video!",
-    },
-    {
-      id: 2,
-      name: "Sarah Codes",
-      avatar: "S",
-      text: "This was really helpful.",
-    },
-  ]);
+  const [saved, setSaved] = useState(false);
+  const [following, setFollowing] = useState(false);
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -54,53 +44,24 @@ const Video = () => {
         }
 
         setVideo(videoData);
+        setSaved(isInWatchLater(id));
 
-        // Load channel information
-        if (videoData.snippet?.channelId) {
-          try {
-            const channelData = await getChannel(
-              videoData.snippet.channelId
-            );
+        const commentData = await getComments(id);
 
-            setChannel(channelData || null);
-          } catch (channelError) {
-            console.error(
-              "Channel error:",
-              channelError
-            );
+        setComments(commentData);
 
-            setChannel(null);
-          }
-        }
+        const channelData = await getChannel(videoData.snippet.channelId);
 
-        // Load recommended videos
-        try {
-          const recommended =
-            await searchVideos(
-              videoData.snippet.title
-            );
+        setChannel(channelData);
 
-          const filtered = recommended.filter(
-            (item) =>
-              item.id?.videoId !== id
-          );
+        const recommendations = await searchVideos(videoData.snippet.title);
 
-          setRecommendedVideos(filtered);
-        } catch (recommendationError) {
-          console.error(
-            "Recommendation error:",
-            recommendationError
-          );
-
-          setRecommendedVideos([]);
-        }
-      } catch (error) {
-        console.error("Video error:", error);
-
-        setError(
-          error.message ||
-            "Unable to load this YouTube video."
+        setRecommended(
+          recommendations.filter((item) => item.id.videoId !== id),
         );
+      } catch (error) {
+        console.error(error);
+        setError("Unable to load this video.");
       } finally {
         setLoading(false);
       }
@@ -109,41 +70,10 @@ const Video = () => {
     loadVideo();
   }, [id]);
 
-  const handleLike = () => {
-    setLiked(!liked);
-    setDisliked(false);
-  };
-
-  const handleDislike = () => {
-    setDisliked(!disliked);
-    setLiked(false);
-  };
-
-  const handleComment = (e) => {
-    e.preventDefault();
-
-    if (!commentText.trim()) {
-      return;
-    }
-
-    const newComment = {
-      id: Date.now(),
-      name: "Thomas",
-      avatar: "T",
-      text: commentText,
-    };
-
-    setComments([
-      newComment,
-      ...comments,
-    ]);
-
-    setCommentText("");
-  };
-
   if (loading) {
     return (
-      <div className="home__message">
+      <div className="video-page__message">
+        <div className="loading__spinner"></div>
         <h2>Loading video...</h2>
       </div>
     );
@@ -151,266 +81,215 @@ const Video = () => {
 
   if (error || !video) {
     return (
-      <div className="video-page">
-        <h2>
-          {error || "Video not found"}
-        </h2>
+      <div className="video-page__message">
+        <h2>{error || "Video not found."}</h2>
 
-        <Link to="/">
-          Back to Home
+        <Link to="/" className="video-page__back-button">
+          ← Back to Discover
         </Link>
       </div>
     );
   }
 
-  const title = video.snippet?.title || "Untitled";
+  const { snippet, statistics } = video;
 
-  const channelTitle =
-    video.snippet?.channelTitle ||
-    "Unknown channel";
+  const views = Number(statistics?.viewCount || 0).toLocaleString();
+
+  const likes = Number(statistics?.likeCount || 0).toLocaleString();
+
+  const publishedDate = new Date(snippet.publishedAt).toLocaleDateString(
+    "en-US",
+    {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    },
+  );
 
   const description =
-    video.snippet?.description ||
-    "No description available.";
-
-  const viewCount =
-    Number(
-      video.statistics?.viewCount || 0
-    ).toLocaleString();
-
-  const publishedDate =
-    video.snippet?.publishedAt
-      ? new Date(
-          video.snippet.publishedAt
-        ).toLocaleDateString()
-      : "";
-
-  const channelName =
-    channel?.snippet?.title ||
-    channelTitle;
-
-  const subscriberCount =
-    channel?.statistics?.subscriberCount;
-
+    snippet.description || "No description was provided for this video.";
   const channelImage =
-    channel?.snippet?.thumbnails?.default?.url ||
+    channel?.snippet?.thumbnails?.high?.url ||
     channel?.snippet?.thumbnails?.medium?.url ||
-    channel?.snippet?.thumbnails?.high?.url;
+    channel?.snippet?.thumbnails?.default?.url;
 
   return (
     <div className="video-layout">
-
       <main className="video-page">
+        <Link to="/" className="video-page__back">
+          ← Back to Discover
+        </Link>
 
-        {/* YouTube Player */}
         <div className="video-page__player">
           <iframe
             src={`https://www.youtube.com/embed/${id}`}
-            title={title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            title={snippet.title}
             allowFullScreen
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           />
         </div>
 
-        {/* Video Information */}
         <div className="video-page__info">
+          <div className="video-page__eyebrow">Now watching</div>
 
-          <h1>{title}</h1>
+          <div className="video-page__heading">
+            <h1>{snippet.title}</h1>
 
-          <div className="video-page__stats">
-            <span>
-              {viewCount} views
-            </span>
-
-            <span>•</span>
-
-            <span>
-              {publishedDate}
-            </span>
+            <div className="video-page__stats">
+              <span>{views} views</span>
+              <span>•</span>
+              <span>{publishedDate}</span>
+            </div>
           </div>
 
-          {/* Actions */}
           <div className="video-page__actions">
-
             <button
-              className={
-                liked
-                  ? "video-action active"
-                  : "video-action"
-              }
-              onClick={handleLike}
+              className={liked ? "video-action active" : "video-action"}
+              onClick={() => setLiked(!liked)}
             >
-              👍 Like
-            </button>
-
-            <button
-              className={
-                disliked
-                  ? "video-action active"
-                  : "video-action"
-              }
-              onClick={handleDislike}
-            >
-              👎 Dislike
+              ♡<span>{liked ? "Liked" : "Like"}</span>
+              <small>{likes}</small>
             </button>
 
             <button className="video-action">
-              ↗ Share
+              ↗<span>Share</span>
             </button>
 
-            <button className="video-action">
-              🔖 Save
+            <button
+              className={saved ? "video-action active" : "video-action"}
+              onClick={() => {
+                if (saved) {
+                  removeFromWatchLater(id);
+                  setSaved(false);
+                } else {
+                  addToWatchLater(video);
+                  setSaved(true);
+                }
+              }}
+            >
+              ◷<span>{saved ? "Saved" : "Save"}</span>
             </button>
-
           </div>
 
-          {/* Channel */}
           <div className="video-page__channel">
-
             {channelImage ? (
               <img
                 src={channelImage}
-                alt={channelName}
+                alt={snippet.channelTitle}
+                className="video-channel__avatar"
               />
             ) : (
-              <div className="comment__avatar">
-                {channelName
-                  .charAt(0)
-                  .toUpperCase()}
+              <div className="video-channel__avatar">
+                {snippet.channelTitle.charAt(0).toUpperCase()}
               </div>
             )}
 
-            <div>
-              <h3>{channelName}</h3>
+            <div className="video-channel__info">
+              <strong>{snippet.channelTitle}</strong>
 
-              <p>
-                {subscriberCount
-                  ? `${Number(
-                      subscriberCount
-                    ).toLocaleString()} subscribers`
-                  : "YouTube Channel"}
-              </p>
+              <span>
+                {Number(
+                  channel?.statistics?.subscriberCount || 0,
+                ).toLocaleString()}{" "}
+                followers
+              </span>
             </div>
 
             <button
-              className={
-                subscribed
-                  ? "subscribe subscribed"
-                  : "subscribe"
-              }
-              onClick={() =>
-                setSubscribed(
-                  !subscribed
-                )
-              }
+              className={following ? "subscribe subscribed" : "subscribe"}
+              onClick={() => setFollowing(!following)}
             >
-              {subscribed
-                ? "Subscribed"
-                : "Subscribe"}
+              {following ? "Following" : "Follow"}
             </button>
-
           </div>
 
-          {/* Description */}
           <div className="video-page__description">
-            <p>{description}</p>
+            <h3>About this video</h3>
+            <p>{description}</p>{" "}
           </div>
-
         </div>
 
-        {/* Comments */}
-        <div className="comments">
+        <section className="comments">
+          <div className="comments__heading">
+            <h2>Comments</h2>
+            <span>Join the conversation</span>
+          </div>
 
-          <h2>
-            {comments.length} Comments
-          </h2>
+          <div className="comment-form">
+            <div className="comment-avatar">T</div>
 
-          <form
-            className="comment-form"
-            onSubmit={handleComment}
-          >
-            <div className="comment__avatar">
-              T
-            </div>
+            <input type="text" placeholder="Share your thoughts..." />
 
-            <div className="comment-form__content">
-
-              <input
-                type="text"
-                placeholder="Add a comment..."
-                value={commentText}
-                onChange={(e) =>
-                  setCommentText(
-                    e.target.value
-                  )
-                }
-              />
-
-              <button type="submit">
-                Comment
-              </button>
-
-            </div>
-          </form>
+            <button>Post</button>
+          </div>
 
           <div className="comment-list">
+            {comments.length > 0 ? (
+              comments.map((comment) => {
+                const commentData = comment.snippet.topLevelComment.snippet;
 
-            {comments.map((comment) => (
-              <div
-                className="comment"
-                key={comment.id}
-              >
-                <div className="comment__avatar">
-                  {comment.avatar}
-                </div>
+                const author = commentData.authorDisplayName || "Unknown user";
 
-                <div className="comment__content">
+                const avatar = commentData.authorProfileImageUrl;
 
-                  <h4>{comment.name}</h4>
+                const published = new Date(
+                  commentData.publishedAt,
+                ).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                });
 
-                  <p>
-                    {comment.text}
-                  </p>
+                return (
+                  <article className="comment" key={comment.id}>
+                    {avatar ? (
+                      <img
+                        className="comment-avatar"
+                        src={avatar}
+                        alt={author}
+                      />
+                    ) : (
+                      <div className="comment-avatar">
+                        {author.charAt(0).toUpperCase()}
+                      </div>
+                    )}
 
-                </div>
+                    <div className="comment__content">
+                      <div className="comment__author">
+                        <strong>{author}</strong>
+                        <span>{published}</span>
+                      </div>
+
+                      <p>
+                        {commentData.textDisplay ||
+                          commentData.textOriginal ||
+                          ""}
+                      </p>
+                    </div>
+                  </article>
+                );
+              })
+            ) : (
+              <div className="comments__empty">
+                <p>No comments available for this video.</p>
               </div>
-            ))}
-
+            )}
           </div>
-
-        </div>
-
-        <Link
-          to="/"
-          className="video-page__back"
-        >
-          ← Back to Home
-        </Link>
-
+        </section>
       </main>
 
-      {/* Recommended */}
       <aside className="recommended">
-
-        <h2>Recommended</h2>
-
-        <div className="recommended__list">
-
-          {recommendedVideos.map(
-            (recommendedVideo) => (
-              <VideoCard
-                key={
-                  recommendedVideo.id?.videoId
-                }
-                video={recommendedVideo}
-              />
-            )
-          )}
-
+        <div className="recommended__heading">
+          <span>Continue watching</span>
+          <h2>Up next</h2>
         </div>
 
+        <div className="recommended__list">
+          {recommended.slice(0, 6).map((item) => (
+            <VideoCard key={item.id.videoId} video={item} />
+          ))}
+        </div>
       </aside>
-
     </div>
   );
 };

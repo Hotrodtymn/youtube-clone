@@ -5,26 +5,29 @@ const Nav = ({ toggleSidebar }) => {
   const [search, setSearch] = useState("");
   const history = useHistory();
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = (event) => {
+    event.preventDefault();
 
     if (!search.trim()) {
       return;
     }
 
     history.push(
-      `/search?query=${encodeURIComponent(search)}`
+      `/search?query=${encodeURIComponent(search.trim())}`
     );
   };
 
   return (
-    <nav className="nav">
+    <header className="nav">
       <div className="nav__left">
         <button
           className="nav__menu"
           onClick={toggleSidebar}
+          aria-label="Toggle sidebar"
         >
-          ☰
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
 
         <Link to="/" className="nav__logo">
@@ -32,7 +35,9 @@ const Nav = ({ toggleSidebar }) => {
             ▶
           </span>
 
-          <span>YouTube</span>
+          <span className="nav__logo--text">
+            Rockstreamer
+          </span>
         </Link>
       </div>
 
@@ -40,37 +45,56 @@ const Nav = ({ toggleSidebar }) => {
         className="nav__search"
         onSubmit={handleSearch}
       >
+        <span className="nav__search-icon">
+          ⌕
+        </span>
+
         <input
           type="text"
-          placeholder="Search"
           value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
+          onChange={(event) =>
+            setSearch(event.target.value)
           }
+          placeholder="Search videos, creators, topics..."
+          aria-label="Search"
         />
+
+        {search && (
+          <button
+            type="button"
+            className="nav__search-clear"
+            onClick={() => setSearch("")}
+            aria-label="Clear search"
+          >
+            ×
+          </button>
+        )}
 
         <button
           type="submit"
-          className="nav__search--button"
+          className="nav__search-button"
+          aria-label="Submit search"
         >
-          🔍
+          Search
         </button>
       </form>
 
       <div className="nav__right">
-        <button className="nav__icon">
-          🎥
+        <button
+          className="nav__icon-button"
+          aria-label="Notifications"
+        >
+          ♢
         </button>
 
-        <button className="nav__icon">
-          🔔
-        </button>
-
-        <div className="nav__profile">
+        <button
+          className="nav__profile"
+          aria-label="Profile"
+        >
           T
-        </div>
+        </button>
       </div>
-    </nav>
+    </header>
   );
 };
 

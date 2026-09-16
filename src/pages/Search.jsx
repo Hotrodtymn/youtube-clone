@@ -47,35 +47,73 @@ const Search = () => {
 
   if (loading) {
     return (
-      <div className="home__message">
-        <h2>Searching YouTube...</h2>
+      <div className="search-page__message">
+        <div className="loading__spinner"></div>
+
+        <h2>Searching Rockstreamer...</h2>
+
+        <p>
+          Looking for something worth watching.
+        </p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="home__message">
+      <div className="search-page__message">
         <h2>{error}</h2>
+
+        <button
+          className="home__retry"
+          onClick={() =>
+            window.location.reload()
+          }
+        >
+          Try again
+        </button>
       </div>
     );
   }
 
   return (
     <div className="search-page">
-      <h1 className="search-page__title">
-        Search results for "{query}"
-      </h1>
+      <header className="search-page__header">
+        <span className="search-page__eyebrow">
+          Search
+        </span>
+
+        <h1>
+          Results for{" "}
+          <span>"{query}"</span>
+        </h1>
+
+        <p>
+          {videos.length} videos found
+        </p>
+      </header>
 
       {videos.length > 0 ? (
-        <VideoGrid videos={videos} />
+        <section className="search-page__results">
+          <VideoGrid videos={videos} />
+        </section>
       ) : (
         <div className="search-page__empty">
-          <h2>No results found</h2>
+          <div className="search-page__empty-icon">
+            ?
+          </div>
+
+          <h2>No videos found</h2>
 
           <p>
-            Try searching for something else.
+            We couldn't find anything matching
+            "{query}".
           </p>
+
+          <span>
+            Try another search or explore
+            something new.
+          </span>
         </div>
       )}
     </div>
