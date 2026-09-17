@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import VideoGrid from "../components/VideoGrid";
 import { searchVideos } from "../services/youtubeApi";
+import VideoSkeletonGrid from "../components/VideoSkeletonGrid";
+import StatusMessage from "../components/StatusMessage";
 
 const categories = [
   {
@@ -66,29 +68,34 @@ const Home = () => {
     loadVideos(category.query);
   };
 
-  if (loading) {
-    return (
-      <div className="home__message">
-        <div className="loading__spinner"></div>
-        <h2>Finding something worth watching...</h2>
+if (loading) {
+  return (
+    <div className="home">
+      <div className="home__loading-header">
+        <span>Discover</span>
+        <h1>Finding something worth watching...</h1>
       </div>
-    );
-  }
 
-  if (error) {
-    return (
-      <div className="home__message">
-        <h2>{error}</h2>
+      <VideoSkeletonGrid count={8} />
+    </div>
+  );
+}
 
-        <button
-          className="home__retry"
-          onClick={() => loadVideos("web development")}
-        >
-          Try again
-        </button>
-      </div>
-    );
-  }
+if (error) {
+  return (
+    <div className="home">
+      <StatusMessage
+        icon="!"
+        title="Something went wrong"
+        message={error}
+        actionLabel="Try again"
+        onAction={() =>
+          loadVideos("web development")
+        }
+      />
+    </div>
+  );
+}
 
   const featuredVideo = videos[0];
   const remainingVideos = videos.slice(1);

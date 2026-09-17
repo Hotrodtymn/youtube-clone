@@ -103,3 +103,45 @@ export const isFavorite = (videoId) => {
     (video) => video.id === videoId
   );
 };
+
+const FOLLOWING_KEY = "rockstreamer_following";
+
+export const getFollowing = () => {
+  try {
+    const stored = localStorage.getItem(FOLLOWING_KEY);
+
+    return stored ? JSON.parse(stored) : [];
+  } catch (error) {
+    console.error("Unable to read following channels:", error);
+
+    return [];
+  }
+};
+
+export const isFollowing = (channelId) => {
+  const channels = getFollowing();
+
+  return channels.includes(channelId);
+};
+
+export const addFollowing = (channelId) => {
+  const channels = getFollowing();
+
+  if (!channels.includes(channelId)) {
+    localStorage.setItem(
+      FOLLOWING_KEY,
+      JSON.stringify([...channels, channelId])
+    );
+  }
+};
+
+export const removeFollowing = (channelId) => {
+  const channels = getFollowing();
+
+  localStorage.setItem(
+    FOLLOWING_KEY,
+    JSON.stringify(
+      channels.filter((id) => id !== channelId)
+    )
+  );
+};

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import VideoGrid from "../components/VideoGrid";
 import { searchVideos } from "../services/youtubeApi";
+import VideoSkeletonGrid from "../components/VideoSkeletonGrid";
+import StatusMessage from "../components/StatusMessage";
 
 const Search = () => {
   const location = useLocation();
@@ -45,36 +47,39 @@ const Search = () => {
     getSearchResults();
   }, [query]);
 
-  if (loading) {
-    return (
-      <div className="search-page__message">
-        <div className="loading__spinner"></div>
+if (loading) {
+  return (
+    <div className="search-page">
+      <header className="search-page__header">
+        <span className="search-page__eyebrow">
+          Search
+        </span>
 
-        <h2>Searching Rockstreamer...</h2>
+        <h1>Searching Rockstreamer...</h1>
 
         <p>
           Looking for something worth watching.
         </p>
-      </div>
-    );
-  }
+      </header>
 
-  if (error) {
-    return (
-      <div className="search-page__message">
-        <h2>{error}</h2>
+      <VideoSkeletonGrid count={8} />
+    </div>
+  );
+}
 
-        <button
-          className="home__retry"
-          onClick={() =>
-            window.location.reload()
-          }
-        >
-          Try again
-        </button>
-      </div>
-    );
-  }
+if (error) {
+  return (
+    <div className="search-page">
+      <StatusMessage
+        icon="!"
+        title="Search unavailable"
+        message={error}
+        actionLabel="Try again"
+        onAction={() => window.location.reload()}
+      />
+    </div>
+  );
+}
 
   return (
     <div className="search-page">
@@ -99,22 +104,21 @@ const Search = () => {
         </section>
       ) : (
         <div className="search-page__empty">
-          <div className="search-page__empty-icon">
-            ?
-          </div>
+  <div className="search-page__empty-icon">
+    ⌕
+  </div>
 
-          <h2>No videos found</h2>
+  <h2>No videos found</h2>
 
-          <p>
-            We couldn't find anything matching
-            "{query}".
-          </p>
+  <p>
+    We couldn't find anything matching "{query}".
+  </p>
 
-          <span>
-            Try another search or explore
-            something new.
-          </span>
-        </div>
+  <span>
+    Try a different search term or explore one of
+    the categories in the sidebar.
+  </span>
+</div>
       )}
     </div>
   );

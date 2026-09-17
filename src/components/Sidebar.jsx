@@ -1,8 +1,12 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-const Sidebar = ({ sidebarOpen }) => {
+const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const location = useLocation();
+
+  const params = new URLSearchParams(location.search);
+  const query = params.get("query");
+  const tab = params.get("tab");
 
   const isHome =
     location.pathname === "/" && !location.search;
@@ -18,29 +22,42 @@ const Sidebar = ({ sidebarOpen }) => {
       label: "Trending",
       icon: "🔥",
       to: "/search?query=trending",
+      active:
+        location.pathname === "/search" &&
+        query === "trending",
     },
     {
       label: "Following",
       icon: "♡",
       to: "/",
+      active: false,
     },
   ];
 
   const libraryItems = [
     {
-  label: "Watch Later",
-  icon: "◷",
-  to: "/library?tab=watch-later",
-},
-   {
-  label: "Favorites",
-  icon: "★",
-  to: "/library?tab=favorites",
-},
+      label: "Watch Later",
+      icon: "◷",
+      to: "/library?tab=watch-later",
+      active:
+        location.pathname === "/library" &&
+        tab !== "favorites",
+    },
+    {
+      label: "Favorites",
+      icon: "★",
+      to: "/library?tab=favorites",
+      active:
+        location.pathname === "/library" &&
+        tab === "favorites",
+    },
     {
       label: "Music",
       icon: "♫",
       to: "/search?query=music",
+      active:
+        location.pathname === "/search" &&
+        query === "music",
     },
   ];
 
@@ -49,16 +66,25 @@ const Sidebar = ({ sidebarOpen }) => {
       label: "Gaming",
       icon: "🎮",
       to: "/search?query=gaming",
+      active:
+        location.pathname === "/search" &&
+        query === "gaming",
     },
     {
       label: "Technology",
       icon: "💻",
       to: "/search?query=technology",
+      active:
+        location.pathname === "/search" &&
+        query === "technology",
     },
     {
       label: "Design",
       icon: "🎨",
       to: "/search?query=design",
+      active:
+        location.pathname === "/search" &&
+        query === "design",
     },
   ];
 
@@ -67,6 +93,7 @@ const Sidebar = ({ sidebarOpen }) => {
       <Link
         key={item.label}
         to={item.to}
+        onClick={closeSidebar}
         className={
           item.active
             ? "sidebar__link active"

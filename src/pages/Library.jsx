@@ -1,21 +1,33 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
-import VideoGrid from "../components/VideoGrid";
+import {
+  useLocation,
+  useHistory,
+} from "react-router-dom";import VideoCard from "../components/Videocard";
 import {
   getWatchLater,
   getFavorites,
+  removeFromWatchLater,
+  removeFromFavorites,
 } from "../services/storage";
 
 const Library = () => {
   const location = useLocation();
+const history = useHistory();
+  useEffect(() => {
+  const params = new URLSearchParams(
+    location.search
+  );
 
-  const params = new URLSearchParams(location.search);
-  const initialTab =
+  const tab =
     params.get("tab") === "favorites"
       ? "favorites"
       : "watch-later";
 
-  const [activeTab, setActiveTab] = useState(initialTab);
+  setActiveTab(tab);
+  loadVideos(tab);
+}, [location.search]);
+
+  const [activeTab, setActiveTab] = useState("watch-later");
   const [videos, setVideos] = useState([]);
 
   const loadVideos = (tab) => {
@@ -30,9 +42,24 @@ const Library = () => {
     loadVideos(activeTab);
   }, [activeTab]);
 
-  const handleTabChange = (tab) => {
-    setActiveTab(tab);
-    loadVideos(tab);
+ const handleTabChange = (tab) => {
+  history.push(
+    `/library?tab=${tab}`
+  );
+};
+
+  const handleRemove = (videoId) => {
+    if (activeTab === "favorites") {
+      removeFromFavorites(videoId);
+    } else {
+      removeFromWatchLater(videoId);
+    }
+
+    setVideos((currentVideos) =>
+      currentVideos.filter(
+        (video) => video.id !== videoId
+      )
+    );
   };
 
   return (
@@ -79,11 +106,31 @@ const Library = () => {
 
       <section className="library-page__content">
         {videos.length > 0 ? (
-          <VideoGrid videos={videos} />
+          <div className="library-page__grid">
+            {videos.map((video) => (
+              <div
+                className="library-page__item"
+                key={video.id}
+              >
+                <VideoCard video={video} />
+
+                <button
+                  className="library-page__remove"
+                  onClick={() =>
+                    handleRemove(video.id)
+                  }
+                >
+                  × Remove
+                </button>
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="library-page__empty">
             <div className="library-page__empty-icon">
-              {activeTab === "favorites" ? "★" : "◷"}
+              {activeTab === "favorites"
+                ? "★"
+                : "◷"}
             </div>
 
             <h2>

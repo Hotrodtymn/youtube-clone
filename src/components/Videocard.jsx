@@ -2,7 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 const VideoCard = ({ video }) => {
-  const videoId = video.id?.videoId;
+  const videoId =
+    typeof video.id === "string"
+      ? video.id
+      : video.id?.videoId;
 
   if (!videoId) {
     return null;
@@ -33,10 +36,7 @@ const VideoCard = ({ video }) => {
         to={`/video/${videoId}`}
         className="video-card__thumbnail"
       >
-        <img
-          src={thumbnail}
-          alt={title}
-        />
+        <img src={thumbnail} alt={title} />
 
         <div className="video-card__play">
           <span>▶</span>

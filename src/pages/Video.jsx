@@ -11,10 +11,15 @@ import {
 import VideoCard from "../components/Videocard";
 
 import {
-  getWatchLater,
   addToWatchLater,
   removeFromWatchLater,
   isInWatchLater,
+  addToFavorites,
+  removeFromFavorites,
+  isFavorite,
+  addFollowing,
+  removeFollowing,
+  isFollowing,
 } from "../services/storage";
 
 const Video = () => {
@@ -30,6 +35,7 @@ const Video = () => {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [following, setFollowing] = useState(false);
+  const [shared, setShared] = useState(false);
 
   useEffect(() => {
     const loadVideo = async () => {
@@ -44,7 +50,11 @@ const Video = () => {
         }
 
         setVideo(videoData);
+        setFollowing(
+  isFollowing(videoData.snippet.channelId)
+);
         setSaved(isInWatchLater(id));
+        setLiked(isFavorite(id));
 
         const commentData = await getComments(id);
 
@@ -90,6 +100,22 @@ const Video = () => {
       </div>
     );
   }
+
+  const handleShare = async () => {
+  const videoUrl = `${window.location.origin}/video/${id}`;
+
+  try {
+    await navigator.clipboard.writeText(videoUrl);
+
+    setShared(true);
+
+    setTimeout(() => {
+      setShared(false);
+    }, 2000);
+  } catch (error) {
+    console.error("Unable to copy video link:", error);
+  }
+};
 
   const { snippet, statistics } = video;
 
@@ -145,15 +171,32 @@ const Video = () => {
           <div className="video-page__actions">
             <button
               className={liked ? "video-action active" : "video-action"}
-              onClick={() => setLiked(!liked)}
+              onClick={() => {
+                if (liked) {
+                  removeFromFavorites(id);
+                  setLiked(false);
+                } else {
+                  addToFavorites(video);
+                  setLiked(true);
+                }
+              }}
             >
-              ♡<span>{liked ? "Liked" : "Like"}</span>
+              {liked ? "♥" : "♡"}
+              <span>{liked ? "Liked" : "Like"}</span>
               <small>{likes}</small>
             </button>
 
-            <button className="video-action">
-              ↗<span>Share</span>
-            </button>
+           <button
+  className={
+    shared
+      ? "video-action active"
+      : "video-action"
+  }
+  onClick={handleShare}
+>
+  ↗
+  <span>{shared ? "Copied!" : "Share"}</span>
+</button>
 
             <button
               className={saved ? "video-action active" : "video-action"}
@@ -196,11 +239,25 @@ const Video = () => {
             </div>
 
             <button
-              className={following ? "subscribe subscribed" : "subscribe"}
-              onClick={() => setFollowing(!following)}
-            >
-              {following ? "Following" : "Follow"}
-            </button>
+  className={
+    following
+      ? "subscribe subscribed"
+      : "subscribe"
+  }
+  onClick={() => {
+    const channelId = snippet.channelId;
+
+    if (following) {
+      removeFollowing(channelId);
+      setFollowing(false);
+    } else {
+      addFollowing(channelId);
+      setFollowing(true);
+    }
+  }}
+>
+  {following ? "Following" : "Follow"}
+</button>
           </div>
 
           <div className="video-page__description">
