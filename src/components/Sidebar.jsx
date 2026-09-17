@@ -8,8 +8,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
   const query = params.get("query");
   const tab = params.get("tab");
 
-  const isHome =
-    location.pathname === "/" && !location.search;
+  const isHome = location.pathname === "/" && !location.search;
 
   const navItems = [
     {
@@ -22,9 +21,7 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
       label: "Trending",
       icon: "🔥",
       to: "/search?query=trending",
-      active:
-        location.pathname === "/search" &&
-        query === "trending",
+      active: location.pathname === "/search" && query === "trending",
     },
     {
       label: "Following",
@@ -39,25 +36,19 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
       label: "Watch Later",
       icon: "◷",
       to: "/library?tab=watch-later",
-      active:
-        location.pathname === "/library" &&
-        tab !== "favorites",
+      active: location.pathname === "/library" && tab !== "favorites",
     },
     {
       label: "Favorites",
       icon: "★",
       to: "/library?tab=favorites",
-      active:
-        location.pathname === "/library" &&
-        tab === "favorites",
+      active: location.pathname === "/library" && tab === "favorites",
     },
     {
       label: "Music",
       icon: "♫",
       to: "/search?query=music",
-      active:
-        location.pathname === "/search" &&
-        query === "music",
+      active: location.pathname === "/search" && query === "music",
     },
   ];
 
@@ -66,25 +57,19 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
       label: "Gaming",
       icon: "🎮",
       to: "/search?query=gaming",
-      active:
-        location.pathname === "/search" &&
-        query === "gaming",
+      active: location.pathname === "/search" && query === "gaming",
     },
     {
       label: "Technology",
       icon: "💻",
       to: "/search?query=technology",
-      active:
-        location.pathname === "/search" &&
-        query === "technology",
+      active: location.pathname === "/search" && query === "technology",
     },
     {
       label: "Design",
       icon: "🎨",
       to: "/search?query=design",
-      active:
-        location.pathname === "/search" &&
-        query === "design",
+      active: location.pathname === "/search" && query === "design",
     },
   ];
 
@@ -94,43 +79,27 @@ const Sidebar = ({ sidebarOpen, closeSidebar }) => {
         key={item.label}
         to={item.to}
         onClick={closeSidebar}
-        className={
-          item.active
-            ? "sidebar__link active"
-            : "sidebar__link"
-        }
+        className={item.active ? "sidebar__link active" : "sidebar__link"}
       >
-        <span className="sidebar__icon">
-          {item.icon}
-        </span>
+        <span className="sidebar__icon">{item.icon}</span>
 
         <span>{item.label}</span>
       </Link>
     ));
 
   return (
-    <aside
-      className={
-        sidebarOpen
-          ? "sidebar"
-          : "sidebar sidebar--closed"
-      }
-    >
+    <aside className={sidebarOpen ? "sidebar" : "sidebar sidebar--closed"}>
       <nav>
         {renderLinks(navItems)}
 
         <div className="sidebar__section">
-          <div className="sidebar__section-title">
-            Library
-          </div>
+          <div className="sidebar__section-title">Library</div>
 
           {renderLinks(libraryItems)}
         </div>
 
         <div className="sidebar__section">
-          <div className="sidebar__section-title">
-            Explore
-          </div>
+          <div className="sidebar__section-title">Explore</div>
 
           {renderLinks(exploreItems)}
         </div>
