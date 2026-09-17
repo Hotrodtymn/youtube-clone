@@ -1,6 +1,9 @@
 const API_KEY = process.env.REACT_APP_YOUTUBE_API_KEY;
 const BASE_URL = "https://www.googleapis.com/youtube/v3";
 
+console.log("API key loaded:", !!process.env.REACT_APP_YOUTUBE_API_KEY);
+
+
 export const searchVideos = async (query) => {
   const url = new URL(`${BASE_URL}/search`);
 
